@@ -9,6 +9,21 @@ export const PAGE_NOT_FOUND_NAME = 'PageNotFound'
 
 export const LAYOUT = () => import('/@/layouts/default/index.vue')
 
+export const EXCEPTION_COMPONENT = () =>
+  import('/@/views/sys/exception/Exception.vue')
+
+/**
+ * @description: parent-layout
+ */
+export const getParentLayout = (_name?: string) => {
+  return () =>
+    new Promise((resolve) => {
+      resolve({
+        name: PARENT_LAYOUT_NAME,
+      })
+    })
+}
+
 const routeModuleList: AppRouteModule[] = []
 const modules = import.meta.globEager('./modules/**/*.ts')
 Object.keys(modules).forEach((key) => {
@@ -82,6 +97,30 @@ export const LoginRoute: AppRouteRecordRaw = {
   meta: {
     title: '登录页',
   },
+}
+
+export const ERROR_LOG_ROUTE: AppRouteRecordRaw = {
+  path: '/error-log',
+  name: 'ErrorLog',
+  component: LAYOUT,
+  redirect: '/error-log/list',
+  meta: {
+    title: 'ErrorLog',
+    hideBreadcrumb: true,
+    hideChildrenInMenu: true,
+  },
+  children: [
+    {
+      path: 'list',
+      name: 'ErrorLogList',
+      component: () => import('/@/views/sys/error-log/index.vue'),
+      meta: {
+        title: '错误日志列表',
+        hideBreadcrumb: true,
+        currentActiveMenu: '/error-log',
+      },
+    },
+  ],
 }
 
 // Basic routing without permission

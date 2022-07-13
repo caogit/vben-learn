@@ -1,5 +1,9 @@
 import { createApp } from 'vue'
-import '@/scss/index.less'
+import '@/theme/index.css'
+// import 'ant-design-vue/dist/antd.css'
+// import Antd from 'ant-design-vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import App from './App.vue'
 import { router, setupRouter } from '@/router/index'
 import { setRouterGuard } from '@/router/guard/index'
@@ -16,6 +20,12 @@ async function bootstrap() {
 
   // 使用pinia
   setupStore(app)
+
+  // 引入antDesignVue
+  // app.use(Antd)
+
+  // 引入element plus
+  app.use(ElementPlus)
 
   app.mount('#app')
 }

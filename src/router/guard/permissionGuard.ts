@@ -2,7 +2,7 @@ import type { Router, RouteRecordRaw } from 'vue-router'
 
 import { usePermissionStoreWithOut } from '/@/store/modules/permission'
 
-import { PageEnum } from '/@/enums/pageEnum'
+import { PageEnum } from '/@/enums/PageEnum'
 import { useUserStoreWithOut } from '/@/store/modules/user'
 
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes'
@@ -86,14 +86,14 @@ export function createPermissionGuard(router: Router) {
     }
 
     // get userinfo while last fetch time is empty
-    if (userStore.getLastUpdateTime === 0) {
-      try {
-        await userStore.getUserInfoAction()
-      } catch (err) {
-        next()
-        return
-      }
-    }
+    // if (userStore.getLastUpdateTime === 0) {
+    //   try {
+    //     await userStore.getUserInfoAction()
+    //   } catch (err) {
+    //     next()
+    //     return
+    //   }
+    // }
 
     if (permissionStore.getIsDynamicAddedRoute) {
       next()
