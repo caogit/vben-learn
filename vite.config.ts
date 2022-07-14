@@ -9,7 +9,17 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '/@': path.resolve(__dirname, './src'),
+      '/#': path.resolve(__dirname, './types'),
       '*': path.resolve(''),
+    },
+  },
+  server: {
+    proxy: {
+      '/basic-api': {
+        target: 'http://localhost:8080/jeecg-boot',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/basic-api', ''),
+      },
     },
   },
 })

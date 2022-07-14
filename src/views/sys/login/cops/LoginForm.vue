@@ -15,17 +15,24 @@
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
 import { LoginSystem } from '/@/api/Login/login'
-const form = ref({
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
+const form = reactive({
   username: 'admin',
-  password: 'admin123',
+  password: '123456',
 })
 
-const onLogin = () => {
-  console.log(LoginSystem)
-
-  // LoginSystem(form)
+async function onLogin() {
+  try {
+    await userStore.login(form)
+  } catch (error) {}
+  // LoginSystem({
+  //   ...form.value,
+  //   uuid: 'b8cc316c2776465fada540859c4b24ay',
+  //   code: '0',
+  // })
   //   .then((res) => {
-  //     console.log('🤡 ~~ res', res)
+
   //   })
   //   .catch((err) => {})
 }
