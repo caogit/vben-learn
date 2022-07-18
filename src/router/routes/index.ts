@@ -1,13 +1,13 @@
 import type { AppRouteRecordRaw, AppRouteModule } from '../type'
 import { PageEnum } from '@/enums/PageEnum'
 
+export const LAYOUT = () => import('/@/layouts/default/index.vue')
+
 export const REDIRECT_NAME = 'Redirect'
 
 export const PARENT_LAYOUT_NAME = 'ParentLayout'
 
 export const PAGE_NOT_FOUND_NAME = 'PageNotFound'
-
-export const LAYOUT = () => import('/@/layouts/default/index.vue')
 
 export const EXCEPTION_COMPONENT = () =>
   import('/@/views/sys/exception/Exception.vue')
@@ -24,13 +24,14 @@ export const getParentLayout = (_name?: string) => {
     })
 }
 
-const routeModuleList: AppRouteModule[] = []
+export const routeModuleList: AppRouteModule[] = []
 const modules = import.meta.globEager('./modules/**/*.ts')
 Object.keys(modules).forEach((key) => {
   const mod = modules[key].default || {}
   const modList = Array.isArray(mod) ? [...mod] : [mod]
   routeModuleList.push(...modList)
 })
+console.log('🤡 ~~ routeModuleList', routeModuleList)
 
 // 404 on a page
 export const PAGE_NOT_FOUND_ROUTE: AppRouteRecordRaw = {

@@ -7,22 +7,27 @@ import { toRaw } from 'vue'
 import {
   transformObjToRoute,
   flatMultiLevelRoutes,
+  addSlashToRouteComponent,
 } from '/@/router/helper/routeHelper'
 import { transformRouteToMenu } from '/@/router/helper/menuHelper'
 
-import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/index'
+import {
+  ERROR_LOG_ROUTE,
+  PAGE_NOT_FOUND_ROUTE,
+  routeModuleList,
+} from '/@/router/routes/index'
 
 import { filter } from '/@/utils/helper/treeHelper'
 
-// import { getMenuList } from '/@/api/sys/menu'
-// import { getPermCode } from '/@/api/sys/user'
+import { getMenuList } from '@/api/Menu/menu'
+import { getPermCode } from '/@/api/Login/login'
 
 import { PageEnum } from '/@/enums/PageEnum'
 
 interface PermissionState {
   // Permission code list
   permCodeList: string[] | number[]
-  // Whether the route has been dynamically added
+  // 是否是动态路由
   isDynamicAddedRoute: boolean
   // To trigger a menu update
   lastBuildMenuTime: number
@@ -33,8 +38,9 @@ interface PermissionState {
 export const usePermissionStore = defineStore({
   id: 'app-permission',
   state: (): PermissionState => ({
+    // 按钮权限code
     permCodeList: [],
-    // Whether the route has been dynamically added
+    // 是否是动态路由
     isDynamicAddedRoute: false,
     // To trigger a menu update
     lastBuildMenuTime: 0,
@@ -88,15 +94,13 @@ export const usePermissionStore = defineStore({
       this.lastBuildMenuTime = 0
     },
     async changePermissionCode() {
-      // const codeList = await getPermCode()
-      const codeList: any = []
+      const codeList = await getPermCode()
       this.setPermCodeList(codeList)
     },
     async buildRoutesAction(): Promise<AppRouteRecordRaw[]> {
       const userStore = useUserStore()
 
       let routes: AppRouteRecordRaw[] = []
-      const roleList = toRaw(userStore.getRoleList) || []
 
       // const routeFilter = (route: AppRouteRecordRaw) => {
       //   const { meta } = route
@@ -142,34 +146,39 @@ export const usePermissionStore = defineStore({
         return
       }
 
-      // 生成
-      const filterRoterList = () => {
-        // !Simulate to obtain permission codes from the background,
-        // this function may only need to be executed once, and the actual project can be put at the right time by itself
-        let routeList: AppRouteRecordRaw[] = []
-        try {
-          this.changePermissionCode()
-          // routeList = (await getMenuList()) as AppRouteRecordRaw[]
-          routeList = []
-        } catch (error) {
-          console.error(error)
-        }
-
-        // Dynamically introduce components
-        routeList = transformObjToRoute(routeList)
-
-        //  Background routing to menu structure
-        const backMenuList = transformRouteToMenu(routeList)
-        this.setBackMenuList(backMenuList)
-
-        // remove meta.ignoreRoute item
-        routeList = filter(routeList, routeRemoveIgnoreFilter)
-        routeList = routeList.filter(routeRemoveIgnoreFilter)
-
-        routeList = flatMultiLevelRoutes(routeList)
-        routes = [PAGE_NOT_FOUND_ROUTE, ...routeList]
+      // 从后台获取权限码，
+      // 这个函数可能只需要执行一次，并且实际的项目可以在正确的时间被放置
+      let routeList: AppRouteRecordRaw[] = []
+      try {
+        this.changePermissionCode()
+        routeList = (await getMenuList()) as AppRouteRecordRaw[]
+      } catch (error) {
+        console.error(error)
       }
-      filterRoterList()
+
+      /**
+       *下面设置routeList采用单一职责，分的很细，保证一个函数干一个事
+       *
+       */
+
+      // 组件地址前加斜杠处理  author: lsq date:2021-09-08
+      routeList = addSlashToRouteComponent(routeList)
+
+      // 动态引入组件
+      routeList = transformObjToRoute(routeList)
+
+      //  Background routing to menu structure
+      const backMenuList = transformRouteToMenu(routeList)
+      console.log('🤡 ~~ backMenuList', backMenuList)
+      this.setBackMenuList(backMenuList)
+
+      // remove meta.ignoreRoute item
+      routeList = filter(routeList, routeRemoveIgnoreFilter)
+      routeList = routeList.filter(routeRemoveIgnoreFilter)
+
+      // 将多级路由都处理成二级路由
+      routeList = flatMultiLevelRoutes(routeList)
+      routes = [...routeList]
 
       routes.push(ERROR_LOG_ROUTE)
       patchHomeAffix(routes)

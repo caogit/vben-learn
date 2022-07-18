@@ -4,7 +4,7 @@
  * @Autor: 曹老板
  * @Date: 2021-11-23 10:16:50
  * @LastEditors: caoao chou45169@163.com
- * @LastEditTime: 2022-07-13 19:10:34
+ * @LastEditTime: 2022-07-15 18:05:59
  */
 // server统一出口
 
@@ -14,6 +14,8 @@ import Cache from '@/utils/cache'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import { checkError } from './request/handleError'
+import { TOKEN_KEY } from '@/enums/cache'
+import { RequestHeaderEnum } from '@/enums/httpEnum'
 
 const insRequest = new packAxios({
   baseURL: BASE_URL,
@@ -22,9 +24,9 @@ const insRequest = new packAxios({
     // 请求成功拦截
     requestInterceptor: (config) => {
       console.log('单个实例请求成功拦截')
-      const token = Cache.getCache('token')
+      const token = Cache.getCache(TOKEN_KEY)
       if (token) {
-        config.headers!.Authorization = token
+        config.headers![RequestHeaderEnum.ASSESS_TOKEN] = token
       }
       return config
     },
@@ -34,6 +36,7 @@ const insRequest = new packAxios({
     },
     // 响应成功拦截
     responseInterceptor: (config) => {
+      // console.log('🤡 ~~ config', config)
       // console.log('单个实例响应成功拦截')
       return config
     },

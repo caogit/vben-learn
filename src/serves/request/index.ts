@@ -105,7 +105,7 @@ class packAxios {
         .request<any, T>(parms)
         .then((res) => {
           // 暂时不考虑请求成功，但是是错误信息
-          console.log('🤡 ~~ res', res)
+          // console.log('🤡 ~~ res', res)
 
           // 1. 单个请求对数据处理
           if (parms?.interceptor?.responseInterceptor) {

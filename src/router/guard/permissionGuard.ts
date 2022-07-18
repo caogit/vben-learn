@@ -37,7 +37,7 @@ export function createPermissionGuard(router: Router) {
       if (to.path === LOGIN_PATH && token) {
         const isSessionTimeout = userStore.getSessionTimeout
         try {
-          await userStore.afterLoginAction()
+          await userStore.afterLoginAction(true)
           if (!isSessionTimeout) {
             next((to.query?.redirect as string) || '/')
             return
