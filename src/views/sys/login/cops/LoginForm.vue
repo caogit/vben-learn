@@ -18,7 +18,7 @@ import { LoginSystem } from '/@/api/Login/login'
 import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 const form = reactive({
-  username: 'admin',
+  username: 'caoao',
   password: '123456',
 })
 

@@ -2,8 +2,7 @@ import { createApp } from 'vue'
 import '@/theme/index.css'
 // import 'ant-design-vue/dist/antd.css'
 // import Antd from 'ant-design-vue'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+import { registerModule } from '@/global/index'
 import App from './App.vue'
 import { router, setupRouter } from '@/router/index'
 import { setRouterGuard } from '@/router/guard/index'
@@ -24,8 +23,8 @@ async function bootstrap() {
   // 引入antDesignVue
   // app.use(Antd)
 
-  // 引入element plus
-  app.use(ElementPlus)
+  // 引入组件库和icon
+  app.use(registerModule)
 
   app.mount('#app')
 }

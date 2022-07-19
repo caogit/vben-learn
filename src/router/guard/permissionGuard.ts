@@ -1,6 +1,7 @@
 import type { Router, RouteRecordRaw } from 'vue-router'
 
 import { usePermissionStoreWithOut } from '/@/store/modules/permission'
+import { useMenuStatusStoreWithOut } from '@/store/modules/menuStatus'
 
 import { PageEnum } from '/@/enums/PageEnum'
 import { useUserStoreWithOut } from '/@/store/modules/user'
@@ -18,7 +19,11 @@ const whitePathList: PageEnum[] = [LOGIN_PATH]
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut()
   const permissionStore = usePermissionStoreWithOut()
+  const menuStatusStore = useMenuStatusStoreWithOut()
   router.beforeEach(async (to, from, next) => {
+    // 设置默认激活项
+    menuStatusStore.setSidebarDefault(to.path)
+
     //新增自定义的用户首页（可以每个用户都不相同）
     if (
       from.path === ROOT_PATH &&

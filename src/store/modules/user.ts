@@ -18,7 +18,6 @@ export const useUserStore = defineStore({
   id: 'app-user',
   state: () => ({
     token: '',
-
     userInfo: {},
     sessionTimeout: false,
   }),

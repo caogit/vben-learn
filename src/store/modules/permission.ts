@@ -33,7 +33,6 @@ interface PermissionState {
   lastBuildMenuTime: number
   // Backstage menu list
   backMenuList: Menu[]
-  frontMenuList: Menu[]
 }
 export const usePermissionStore = defineStore({
   id: 'app-permission',
@@ -44,10 +43,8 @@ export const usePermissionStore = defineStore({
     isDynamicAddedRoute: false,
     // To trigger a menu update
     lastBuildMenuTime: 0,
-    // Backstage menu list
+    // 菜单list
     backMenuList: [],
-    // menu List
-    frontMenuList: [],
   }),
   getters: {
     getPermCodeList(): string[] | number[] {
@@ -56,9 +53,7 @@ export const usePermissionStore = defineStore({
     getBackMenuList(): Menu[] {
       return this.backMenuList
     },
-    getFrontMenuList(): Menu[] {
-      return this.frontMenuList
-    },
+
     getLastBuildMenuTime(): number {
       return this.lastBuildMenuTime
     },
@@ -74,10 +69,6 @@ export const usePermissionStore = defineStore({
     setBackMenuList(list: Menu[]) {
       this.backMenuList = list
       list?.length > 0 && this.setLastBuildMenuTime()
-    },
-
-    setFrontMenuList(list: Menu[]) {
-      this.frontMenuList = list
     },
 
     setLastBuildMenuTime() {

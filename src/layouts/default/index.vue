@@ -1,10 +1,22 @@
 <template>
-  <div>
-    <div class="w-full h-10 bg-cyan-400">加载成功，下面是你的页面</div>
-    <router-view></router-view>
-  </div>
+  <el-container class="w-full h-full">
+    <sidebar ref="sidebarRef"></sidebar>
+    <el-container direction="vertical">
+      <headers></headers>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import headers from '@/layouts/default/headers/index.vue'
+import sidebar from '@/layouts/default/sidebar/index.vue'
+const route = useRoute()
+const sidebarRef = ref()
 </script>
+
+<style scoped lang="scss"></style>
