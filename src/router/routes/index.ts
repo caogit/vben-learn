@@ -5,24 +5,10 @@ export const LAYOUT = () => import('/@/layouts/default/index.vue')
 
 export const REDIRECT_NAME = 'Redirect'
 
-export const PARENT_LAYOUT_NAME = 'ParentLayout'
-
 export const PAGE_NOT_FOUND_NAME = 'PageNotFound'
 
 export const EXCEPTION_COMPONENT = () =>
   import('/@/views/sys/exception/Exception.vue')
-
-/**
- * @description: parent-layout
- */
-export const getParentLayout = (_name?: string) => {
-  return () =>
-    new Promise((resolve) => {
-      resolve({
-        name: PARENT_LAYOUT_NAME,
-      })
-    })
-}
 
 export const routeModuleList: AppRouteModule[] = []
 const modules = import.meta.globEager('./modules/**/*.ts')
@@ -78,7 +64,7 @@ export const REDIRECT_ROUTE: AppRouteRecordRaw = {
     },
   ],
 }
-// 需要动态添加的页面
+// 需要动态添加的页面----前端控制路由的时候会用到,由后台控制就不会用到
 export const asyncRoutes = [PAGE_NOT_FOUND_ROUTE, ...routeModuleList]
 
 // 根页面

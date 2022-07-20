@@ -161,6 +161,7 @@ export const usePermissionStore = defineStore({
       //  Background routing to menu structure
       const backMenuList = transformRouteToMenu(routeList)
       console.log('🤡 ~~ backMenuList', backMenuList)
+
       this.setBackMenuList(backMenuList)
 
       // remove meta.ignoreRoute item

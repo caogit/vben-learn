@@ -1,5 +1,5 @@
 <template>
-  <template v-for="(item, index) in props.menuList" :key="item.name">
+  <template v-for="item in props.menuList" :key="item.name">
     <template v-if="!item.hideMenu">
       <el-sub-menu :index="item.path" v-if="item.children">
         <template #title>

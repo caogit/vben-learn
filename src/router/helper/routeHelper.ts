@@ -1,11 +1,7 @@
 import type { AppRouteModule, AppRouteRecordRaw } from '/@/router/type'
 import type { Router, RouteRecordNormalized } from 'vue-router'
 
-import {
-  getParentLayout,
-  LAYOUT,
-  EXCEPTION_COMPONENT,
-} from '/@/router/routes/index'
+import { getParentLayout, LAYOUT } from '/@/router/constand'
 import { cloneDeep, omit } from 'lodash-es'
 import { warn } from '/@/utils/log'
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -13,37 +9,100 @@ const IFRAME = () => import('/@/views/sys/iframe/FrameBlank.vue')
 
 const LayoutMap = new Map<string, () => Promise<typeof import('*.vue')>>()
 
-const modules = import.meta.glob('../../views/**/*.{vue,tsx}')
+let dynamicViewsModules: Record<string, () => Promise<Recordable>>
 
 LayoutMap.set('LAYOUT', LAYOUT)
 LayoutMap.set('IFRAME', IFRAME)
 
-// Turn background objects into routing objects
+// Dynamic introduction
+function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined) {
+  if (!dynamicViewsModules) {
+    dynamicViewsModules = import.meta.glob('../../views/**/*.{vue,tsx}')
+  }
+  if (!routes) return
+  routes.forEach((item) => {
+    if (!item.component && item.meta?.frameSrc) {
+      item.component = 'IFRAME'
+    }
+    let { component, name } = item
+    const { children } = item
+    if (component) {
+      const layoutFound = LayoutMap.get(component.toUpperCase())
+      if (layoutFound) {
+        item.component = layoutFound
+      } else {
+        // update-end--author:zyf---date:20220307--for:VUEN-219兼容后台返回动态首页,目的适配跟v2版本配置一致 --------
+        if (component.indexOf('dashboard/') > -1) {
+          //当数据标sys_permission中component没有拼接index时前端需要拼接
+          if (component.indexOf('/index') < 0) {
+            component = component + '/index'
+          }
+        }
+        // update-end--author:zyf---date:20220307---for:VUEN-219兼容后台返回动态首页,目的适配跟v2版本配置一致 --------
+        // 如果不是LayoutMap中定义好的,就需要去这个dynamicImport方法中动态去views目录下去引入
+        item.component = dynamicImport(dynamicViewsModules, component as string)
+      }
+    } else if (name) {
+      item.component = getParentLayout()
+    }
+    children && asyncImportRoute(children)
+  })
+}
+
+// 通过获取views下的所有文件，去和children中的components去对比，一样就return出去，赋值给item的component
+function dynamicImport(
+  dynamicViewsModules: Record<string, () => Promise<Recordable>>,
+  component: string
+) {
+  const keys = Object.keys(dynamicViewsModules)
+  const matchKeys = keys.filter((key) => {
+    //替换../../views为空字符串
+    const k = key.replace('../../views', '')
+
+    //component是不是以/开头
+    const startFlag = component.startsWith('/')
+    // component是不是以.vue或.tsx开头，注意是component
+    const endFlag = component.endsWith('.vue') || component.endsWith('.tsx')
+    const startIndex = startFlag ? 0 : 1
+    const lastIndex = endFlag ? k.length : k.lastIndexOf('.')
+    return k.substring(startIndex, lastIndex) === component
+  })
+  if (matchKeys?.length === 1) {
+    const matchKey = matchKeys[0]
+    return dynamicViewsModules[matchKey]
+  } else if (matchKeys?.length > 1) {
+    warn(
+      'Please do not create `.vue` and `.TSX` files with the same file name in the same hierarchical directory under the views folder. This will cause dynamic introduction failure'
+    )
+    return
+  }
+}
+
+// 处理第一层路由，主要是将component处理成LAYOUT
 export function transformObjToRoute<T = AppRouteModule>(
   routeList: AppRouteModule[]
 ): T[] {
-  const list = initMenu(routeList)
-  return list
-}
-
-export const initMenu = (menu: any) => {
-  menu.forEach((el: any) => {
-    if (el.component?.includes('index')) {
-      el.component = el.component.replace('/index', '')
-    }
-    const comModule =
-      modules[`../../views${el.component}/index.vue`] ||
-      modules[`../../views${el.component}/index.tsx`]
-    if (el.component === '/layouts/default') {
-      el.component = LAYOUT
+  routeList.forEach((route) => {
+    const component = route.component as string
+    if (component) {
+      if (component.toUpperCase() === 'LAYOUT') {
+        route.component = LayoutMap.get(component.toUpperCase())
+      } else {
+        route.children = [cloneDeep(route)]
+        route.component = LAYOUT
+        route.name = `${route.name}Parent`
+        route.path = ''
+        const meta = route.meta || {}
+        meta.single = true
+        meta.affix = false
+        route.meta = meta
+      }
     } else {
-      el.component = comModule
+      warn('请正确配置路由：' + route?.name + '的component属性')
     }
-    if (el.children != null && el.children.length) {
-      initMenu(el.children)
-    }
+    route.children && asyncImportRoute(route.children)
   })
-  return menu
+  return routeList as unknown as T[]
 }
 
 /**
