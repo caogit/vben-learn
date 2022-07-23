@@ -4,7 +4,7 @@
  * @Autor: 曹老板
  * @Date: 2021-11-23 10:16:50
  * @LastEditors: caoao chou45169@163.com
- * @LastEditTime: 2022-07-15 18:05:59
+ * @LastEditTime: 2022-07-21 10:02:48
  */
 // server统一出口
 
@@ -13,7 +13,6 @@ import { BASE_URL, TIME_OUT } from './request/config'
 import Cache from '@/utils/cache'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import { checkError } from './request/handleError'
 import { TOKEN_KEY } from '@/enums/cache'
 import { RequestHeaderEnum } from '@/enums/httpEnum'
 
@@ -42,16 +41,15 @@ const insRequest = new packAxios({
     },
     // 响应失败拦截
     responseInterceptorCatch: (error) => {
-      console.log('单个实例响应失败拦截', error)
-
       // ElMessage.error('网络请求异常，请稍后重试!')
       // 请求是否被取消
       const isCancel = axios.isCancel(error)
       // 没有被取消
       if (!isCancel) {
-        // console.error(error);
-        ElMessage.error(checkError(error))
-        console.log('报错了！')
+        const { code, message } = error.response.data
+        ElMessage.error(message)
+        if (code === 401) {
+        }
       } else {
         ElMessage.error(
           '重复请求被取消,设置loading或者用axios.CancelToken取消请求'

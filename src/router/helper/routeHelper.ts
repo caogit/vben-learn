@@ -14,7 +14,7 @@ let dynamicViewsModules: Record<string, () => Promise<Recordable>>
 LayoutMap.set('LAYOUT', LAYOUT)
 LayoutMap.set('IFRAME', IFRAME)
 
-// Dynamic introduction
+// 处理多级路由
 function asyncImportRoute(routes: AppRouteRecordRaw[] | undefined) {
   if (!dynamicViewsModules) {
     dynamicViewsModules = import.meta.glob('../../views/**/*.{vue,tsx}')
